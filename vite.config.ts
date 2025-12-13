@@ -1,14 +1,16 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'ExperimentWidget',
       formats: ['iife'],
       fileName: () => 'experiment-widget.js',
     },
     outDir: 'dist',
+    emptyOutDir: true,
     minify: 'terser',
     terserOptions: {
       compress: {

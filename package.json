@@ -19,7 +19,11 @@
   "author": "",
   "license": "ISC",
   "description": "Lightweight experiment widget SDK with impression and click tracking",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
+    "@types/node": "^22.10.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.7"
   }
