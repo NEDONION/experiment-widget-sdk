@@ -1,48 +1,48 @@
 # Experiment Widget SDK
 
-[English](#) | [中文](./README.zh-CN.md)
+[English](./README.md) | [中文](#)
 
-## Overview
+## 概述
 
-Lightweight, zero-dependency experiment widget SDK with automatic impression and click tracking for A/B testing.
+轻量级、零依赖的实验插件 SDK，支持 A/B 测试的自动曝光和点击追踪。
 
-**Features:**
-- **Zero Configuration**: Just one `<script>` tag
-- **Lightweight**: Only 3.38 KB gzipped
-- **Style Isolation**: Shadow DOM prevents style conflicts
-- **Auto Tracking**: Automatic impression and click tracking
-- **TypeScript**: Full type support
+**特性：**
+- **零配置接入**: 仅需一行 `<script>` 标签
+- **轻量级**: 压缩后仅 3.38 KB (gzip)
+- **样式隔离**: Shadow DOM 防止样式冲突
+- **自动埋点**: 自动收集曝光和点击数据
+- **TypeScript**: 完整的类型支持
 
 ---
 
-## Quick Start
+## 快速开始
 
-### 1. Deploy to Vercel (Recommended)
+### 1. 部署到 Vercel（推荐）
 
-**Option A: One-Click Deploy Script**
+**方式 A：一键部署脚本**
 
 ```bash
 bash scripts/deploy.sh
 ```
 
-**Option B: Manual Deploy**
+**方式 B：手动部署**
 
 ```bash
-# Install Vercel CLI
+# 安装 Vercel CLI
 npm install -g vercel
 
-# Login
+# 登录
 vercel login
 
-# Deploy
+# 部署
 vercel --prod
 ```
 
-You'll get a URL like: `https://experiment-widget-sdk.vercel.app`
+你会得到一个 URL：`https://experiment-widget-sdk.vercel.app`
 
-### 2. Embed Widget
+### 2. 嵌入插件
 
-Add this script tag to any webpage:
+在任何网页中添加以下代码:
 
 ```html
 <script
@@ -54,30 +54,30 @@ Add this script tag to any webpage:
 </script>
 ```
 
-### 3. Parameters
+### 3. 参数说明
 
-| Attribute | Required | Description |
-|-----------|----------|-------------|
-| `src` | Yes | Widget CDN URL |
-| `data-api-base` | Yes | Backend API base URL |
-| `data-experiment-id` | Yes | Experiment ID |
-| `data-user-key` | No | User identifier (optional) |
-| `async` | Recommended | Async loading, non-blocking |
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `src` | 是 | 插件的 CDN 地址 |
+| `data-api-base` | 是 | 后端 API 基地址 |
+| `data-experiment-id` | 是 | 实验 ID |
+| `data-user-key` | 否 | 用户标识（可选） |
+| `async` | 推荐 | 异步加载，不阻塞页面渲染 |
 
 ---
 
-## Usage Examples
+## 使用示例
 
-### Basic Example
+### 基础示例
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Website</title>
+  <title>我的网站</title>
 </head>
 <body>
-  <h1>Welcome</h1>
+  <h1>欢迎</h1>
 
   <script
     src="https://your-project.vercel.app/experiment-widget.js"
@@ -89,7 +89,7 @@ Add this script tag to any webpage:
 </html>
 ```
 
-### Dynamic Loading with JavaScript
+### 使用 JavaScript 动态加载
 
 ```html
 <script>
@@ -104,7 +104,7 @@ Add this script tag to any webpage:
 </script>
 ```
 
-### React Integration
+### React 集成
 
 ```jsx
 import { useEffect } from 'react';
@@ -127,11 +127,11 @@ function App() {
     };
   }, []);
 
-  return <div className="App"><h1>My React App</h1></div>;
+  return <div className="App"><h1>我的 React 应用</h1></div>;
 }
 ```
 
-### Vue 3 Integration
+### Vue 3 集成
 
 ```vue
 <script setup>
@@ -157,7 +157,7 @@ onUnmounted(() => {
 </script>
 ```
 
-### Next.js Integration
+### Next.js 集成
 
 ```jsx
 import Script from 'next/script';
@@ -179,73 +179,73 @@ function MyApp({ Component, pageProps }) {
 
 ---
 
-## Local Development
+## 本地开发
 
-### Install Dependencies
+### 安装依赖
 
 ```bash
 npm install
 ```
 
-### Development Mode
+### 开发模式
 
 ```bash
 npm run dev
 ```
 
-Visit: `http://localhost:5173`
+访问：`http://localhost:5173`
 
-### Production Build
+### 生产构建
 
 ```bash
 npm run build
 ```
 
-Output: `dist/experiment-widget.js` (10.83 kB, gzip: 3.38 kB)
+输出：`dist/experiment-widget.js` (10.83 kB, gzip: 3.38 kB)
 
-### Preview Build
+### 预览构建产物
 
 ```bash
 npm run preview
 ```
 
-Visit: `http://localhost:4173`
+访问：`http://localhost:4173`
 
 ---
 
-## API Endpoints
+## API 接口
 
-The widget requires the following backend endpoints:
+插件需要后端提供以下接口：
 
-### 1. Get Experiment Content
+### 1. 获取实验内容
 
 ```
 GET /experiments/{experiment_id}/assign?user_key={user_key}
 ```
 
-**Response Example:**
+**响应示例：**
 
 ```json
 {
   "code": 0,
   "data": {
     "creative_id": "c1",
-    "title": "AI Creative Platform",
+    "title": "AI 创意生成平台",
     "product_name": "Product Name",
-    "cta_text": "Learn More",
+    "cta_text": "了解更多",
     "image_url": "https://example.com/image.jpg",
-    "selling_points": ["Point 1", "Point 2"]
+    "selling_points": ["卖点1", "卖点2"]
   }
 }
 ```
 
-### 2. Track Impression
+### 2. 上报曝光
 
 ```
 POST /experiments/{experiment_id}/hit
 ```
 
-**Request Body:**
+**请求体：**
 
 ```json
 {
@@ -256,13 +256,13 @@ POST /experiments/{experiment_id}/hit
 }
 ```
 
-### 3. Track Click
+### 3. 上报点击
 
 ```
 POST /experiments/{experiment_id}/click
 ```
 
-**Request Body:**
+**请求体：**
 
 ```json
 {
@@ -275,56 +275,56 @@ POST /experiments/{experiment_id}/click
 
 ---
 
-## Tracking Mechanics
+## 埋点说明
 
-### Impression Tracking
+### 曝光（Impression）
 
-- **Trigger**: Element enters viewport ≥ 50%, duration ≥ 500ms
-- **Deduplication**: Only reported once per `creative_id`
-- **Implementation**: IntersectionObserver
+- **触发条件**: 元素进入可视区域 ≥ 50%，持续 ≥ 500ms
+- **去重策略**: 同一 `creative_id` 仅上报一次
+- **实现方式**: IntersectionObserver
 
-### Click Tracking
+### 点击（Click）
 
-- **Trigger**: User clicks the widget card
-- **Method**: Prioritizes `navigator.sendBeacon`, falls back to `fetch` with `keepalive`
+- **触发条件**: 用户点击广告卡片
+- **上报方式**: 优先使用 `navigator.sendBeacon`，降级为 `fetch` with `keepalive`
 
 ---
 
-## Architecture
+## 架构说明
 
-### Project Structure
+### 目录结构
 
 ```
 experiment-widget-sdk/
 ├── src/
-│   ├── index.ts        # Entry point (IIFE)
-│   ├── widget.ts       # Main component
-│   ├── api.ts          # API client
-│   ├── tracker.ts      # Tracking logic
-│   ├── styles.ts       # Styles (injected to Shadow DOM)
-│   └── types.ts        # TypeScript types
-├── dist/               # Build output
+│   ├── index.ts        # 入口文件（IIFE）
+│   ├── widget.ts       # 主组件
+│   ├── api.ts          # API 客户端
+│   ├── tracker.ts      # 埋点追踪
+│   ├── styles.ts       # 样式（注入 Shadow DOM）
+│   └── types.ts        # TypeScript 类型定义
+├── dist/               # 构建产物
 │   └── experiment-widget.js
-├── vite.config.ts      # Vite configuration
-├── tsconfig.json       # TypeScript configuration
+├── vite.config.ts      # Vite 配置
+├── tsconfig.json       # TypeScript 配置
 └── package.json
 ```
 
-### Tech Stack
+### 技术栈
 
-- **TypeScript**: Type safety
-- **Vite**: Fast build, IIFE output
-- **Shadow DOM**: Style isolation
-- **IntersectionObserver**: High-performance impression tracking
-- **Navigator.sendBeacon**: Reliable data reporting
+- **TypeScript**: 类型安全
+- **Vite**: 快速构建，IIFE 格式输出
+- **Shadow DOM**: 样式隔离
+- **IntersectionObserver**: 高性能曝光监测
+- **Navigator.sendBeacon**: 可靠的数据上报
 
 ---
 
-## Deployment
+## 部署
 
-### Vercel Configuration
+### Vercel 配置
 
-Create `vercel.json` in project root:
+在项目根目录创建 `vercel.json`:
 
 ```json
 {
@@ -350,9 +350,9 @@ Create `vercel.json` in project root:
 }
 ```
 
-### Deploy via GitHub
+### 通过 GitHub 部署
 
-1. Push code to GitHub:
+1. 推送代码到 GitHub:
 
 ```bash
 git init
@@ -362,17 +362,17 @@ git remote add origin https://github.com/YOUR_USERNAME/experiment-widget-sdk.git
 git push -u origin main
 ```
 
-2. Import to Vercel:
-   - Visit [vercel.com/new](https://vercel.com/new)
-   - Select your GitHub repository
-   - Click "Deploy"
+2. 导入到 Vercel:
+   - 访问 [vercel.com/new](https://vercel.com/new)
+   - 选择你的 GitHub 仓库
+   - 点击 "Deploy"
 
-### Custom Domain
+### 自定义域名
 
-1. Go to Vercel project settings > "Domains"
-2. Add your domain (e.g., `widget.yourdomain.com`)
-3. Configure DNS as instructed
-4. Use your custom domain:
+1. 进入 Vercel 项目设置 > "Domains"
+2. 添加你的域名（例如：`widget.yourdomain.com`）
+3. 按照指引配置 DNS
+4. 使用自定义域名:
 
 ```html
 <script
@@ -385,18 +385,18 @@ git push -u origin main
 
 ---
 
-## Troubleshooting
+## 常见问题
 
-### Widget Not Showing?
+### 插件没有显示？
 
-1. Open browser console (F12)
-2. Check for error messages
-3. Verify `data-api-base` and `data-experiment-id` are set
-4. Test if backend API is accessible
+1. 打开浏览器控制台（F12）
+2. 检查是否有错误提示
+3. 确认 `data-api-base` 和 `data-experiment-id` 已填写
+4. 检查后端 API 是否可访问
 
-### CORS Error?
+### CORS 跨域错误？
 
-Ensure `vercel.json` has CORS headers configured:
+确保 `vercel.json` 中配置了 CORS 头:
 
 ```json
 {
@@ -411,19 +411,19 @@ Ensure `vercel.json` has CORS headers configured:
 }
 ```
 
-### API Request Failed?
+### API 请求失败？
 
-Test API accessibility:
+测试 API 是否可访问:
 
 ```bash
 curl https://your-api.com/api/v1/experiments/exp_123/assign
 ```
 
-Check response format matches the expected schema.
+检查返回格式是否正确。
 
-### Cache Issues?
+### 缓存问题？
 
-Use versioned URLs:
+使用带版本号的 URL:
 
 ```html
 <script src="https://your-project.vercel.app/experiment-widget.js?v=20231213" ...>
@@ -431,12 +431,12 @@ Use versioned URLs:
 
 ---
 
-## Best Practices
+## 最佳实践
 
-### 1. Use CDN
-Vercel provides global CDN automatically.
+### 1. 使用 CDN
+Vercel 自带全球 CDN，无需额外配置。
 
-### 2. Version Control
+### 2. 版本控制
 
 ```bash
 npm version patch  # 1.0.0 -> 1.0.1
@@ -445,19 +445,19 @@ git push --tags
 vercel --prod
 ```
 
-### 3. Preview Deployments
+### 3. 预览部署
 
-Use branches for testing:
+使用分支进行测试:
 
 ```bash
 git checkout -b feature/new-ui
 git push origin feature/new-ui
-# Vercel generates preview URL automatically
+# Vercel 会自动生成预览 URL
 ```
 
-### 4. Error Monitoring
+### 4. 错误监控
 
-Integrate error tracking:
+集成错误追踪:
 
 ```typescript
 try {
@@ -466,15 +466,15 @@ try {
   if (window.Sentry) {
     Sentry.captureException(error);
   }
-  console.error('[ExperimentWidget] Init failed', error);
+  console.error('[ExperimentWidget] 初始化失败', error);
 }
 ```
 
 ---
 
-## Comparison with Traditional Approach
+## 与原有方案的对比
 
-### Traditional Approach (Invasive)
+### 原有方案（侵入式）
 
 ```tsx
 import ExperimentWidget from './components/ExperimentWidget';
@@ -488,13 +488,13 @@ function App() {
 }
 ```
 
-**Drawbacks:**
-- Requires modifying client code
-- Depends on client's React environment
-- Tightly coupled with client codebase
-- Requires client rebuild for updates
+**缺点：**
+- 需要修改客户端代码
+- 依赖客户端的 React 环境
+- 与客户端代码耦合
+- 需要重新构建客户端项目
 
-### New Approach (Independent)
+### 新方案（独立部署）
 
 ```html
 <script
@@ -505,15 +505,15 @@ function App() {
 </script>
 ```
 
-**Benefits:**
-- Zero intrusion: no client code changes
-- Independent deployment via CDN
-- Zero dependencies: framework-agnostic
-- Style isolation: Shadow DOM
-- Instant updates: no client rebuild needed
+**优点：**
+- ✅ 零侵入: 无需修改客户端代码
+- ✅ 独立部署: 通过 CDN 分发
+- ✅ 零依赖: 不依赖客户端框架
+- ✅ 样式隔离: Shadow DOM 防止样式冲突
+- ✅ 即时更新: 更新插件无需重新构建客户端
 
 ---
 
-## License
+## 许可证
 
 ISC
