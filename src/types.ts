@@ -3,15 +3,7 @@ export interface WidgetConfig {
   experimentId: string;
   userKey?: string;
   randomAssignment?: boolean; // true: 每次随机, false: 固定分配
-  position?: WidgetPosition;
 }
-
-export type WidgetPosition =
-  | 'bottom-left'
-  | 'top-right'
-  | 'top-left'
-  | 'left'
-  | 'right';
 
 export interface AssignData {
   creative_id: string | number;

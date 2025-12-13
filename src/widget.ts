@@ -1,7 +1,7 @@
 import { ApiClient } from './api';
 import { ImpressionTracker, ClickTracker } from './tracker';
 import { widgetStyles } from './styles';
-import type { WidgetConfig, AssignData, WidgetPosition } from './types';
+import type { WidgetConfig, AssignData } from './types';
 
 export class ExpWidget {
   private config: WidgetConfig;
@@ -14,7 +14,6 @@ export class ExpWidget {
   private creativeId: string | number | null = null;
   private isOpen = false;
   private toastTimer: number | null = null;
-  private positionClass: string;
 
   constructor(config: WidgetConfig) {
     this.config = config;
@@ -30,8 +29,6 @@ export class ExpWidget {
       config.experimentId,
       this.anonId
     );
-
-    this.positionClass = this.getPositionClass(config.position);
 
     // Create container and shadow DOM
     this.container = document.createElement('div');
@@ -68,7 +65,6 @@ export class ExpWidget {
   private createUI(): void {
     const wrapper = document.createElement('div');
     wrapper.className = 'exp-widget-container';
-    wrapper.classList.add(this.positionClass);
 
     wrapper.innerHTML = `
       <div class="exp-widget-badge" id="badge" aria-label="A/B experiment ads">
@@ -233,44 +229,5 @@ export class ExpWidget {
     }
 
     this.container.remove();
-  }
-
-  private getPositionClass(position?: WidgetPosition | string): string {
-    const normalized = this.normalizePosition(position);
-    const allowed: WidgetPosition[] = [
-      'bottom-right',
-      'bottom-left',
-      'top-right',
-      'top-left',
-      'left',
-      'right',
-    ];
-
-    if (normalized && allowed.includes(normalized)) {
-      return `pos-${normalized}`;
-    }
-
-    return 'pos-bottom-right';
-  }
-
-  private normalizePosition(position?: string): WidgetPosition | null {
-    if (!position) return null;
-    const normalized = position
-      .replace(/([a-z])([A-Z])/g, '$1-$2')
-      .replace(/_/g, '-')
-      .toLowerCase()
-      .trim();
-
-    const allowed: WidgetPosition[] = [
-      'bottom-left',
-      'top-right',
-      'top-left',
-      'left',
-      'right',
-    ];
-
-    return allowed.includes(normalized as WidgetPosition)
-      ? (normalized as WidgetPosition)
-      : null;
   }
 }
