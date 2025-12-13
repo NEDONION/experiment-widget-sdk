@@ -395,38 +395,29 @@ experiment-widget-sdk/
 
 ## Deployment
 
-### Vercel Configuration
+### Quick Deploy to Vercel
 
-Create `vercel.json` in project root:
+**Method 1: Using Vercel CLI (Recommended)**
 
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "headers": [
-    {
-      "source": "/experiment-widget.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        }
-      ]
-    }
-  ]
-}
+```bash
+# Install Vercel CLI globally
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy to production
+vercel --prod
 ```
 
-### Deploy via GitHub
+After deployment, you'll get a URL like:
+```
+https://experiment-widget-sdk-xxx.vercel.app
+```
 
-1. Push code to GitHub:
+**Method 2: Deploy via GitHub**
 
+1. **Push to GitHub**
 ```bash
 git init
 git add .
@@ -435,18 +426,57 @@ git remote add origin https://github.com/YOUR_USERNAME/experiment-widget-sdk.git
 git push -u origin main
 ```
 
-2. Import to Vercel:
+2. **Import to Vercel**
    - Visit [vercel.com/new](https://vercel.com/new)
-   - Select your GitHub repository
-   - Click "Deploy"
+   - Connect your GitHub account
+   - Select the repository
+   - Vercel will auto-detect settings
+   - Click **Deploy**
 
-### Custom Domain
+3. **Automatic Deployments**
+   - Every push to `main` triggers a new deployment
+   - Preview deployments for pull requests
 
-1. Go to Vercel project settings > "Domains"
-2. Add your domain (e.g., `widget.yourdomain.com`)
-3. Configure DNS as instructed
-4. Use your custom domain:
+### Configuration Files
 
+The project includes pre-configured files:
+
+**vercel.json** - Vercel deployment settings
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "headers": [...]  // CORS headers already configured
+}
+```
+
+**.node-version** - Node.js version
+```
+20
+```
+
+**package.json** - Build configuration
+```json
+{
+  "scripts": {
+    "build": "vite build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+```
+
+### Using Custom Domain
+
+1. In Vercel dashboard, go to your project
+2. Click **Settings** > **Domains**
+3. Add your domain: `widget.yourdomain.com`
+4. Follow DNS configuration instructions
+5. Wait for DNS propagation (usually < 5 minutes)
+
+Then use your custom domain:
 ```html
 <script
   src="https://widget.yourdomain.com/experiment-widget.js"
@@ -456,51 +486,115 @@ git push -u origin main
 </script>
 ```
 
+### Deployment Checklist
+
+Before deploying, make sure:
+
+- [ ] Local build succeeds: `npm run build`
+- [ ] `dist/experiment-widget.js` is generated
+- [ ] Backend API supports CORS (see API Endpoints section)
+- [ ] `vercel.json` is in project root
+- [ ] Git repository is initialized
+
+### Update Deployment
+
+**Automatic (via GitHub):**
+```bash
+git add .
+git commit -m "Update widget"
+git push
+# Vercel auto-deploys
+```
+
+**Manual (via CLI):**
+```bash
+vercel --prod
+```
+
 ---
 
 ## Troubleshooting
 
-### Widget Not Showing?
+### Build Errors
+
+**Error: "Could not resolve entry module 'index.html'"**
+
+This error occurs when Vite tries to find `index.html` instead of using library mode.
+
+✅ **Solution**: Make sure your `vite.config.ts` has:
+```typescript
+import { defineConfig } from 'vite';
+import path from 'path';
+
+export default defineConfig({
+  build: {
+    lib: {
+      entry: path.resolve(__dirname, 'src/index.ts'),
+      // ...
+    },
+  },
+});
+```
+
+And ensure `@types/node` is installed:
+```bash
+npm install -D @types/node
+```
+
+**Error: Build fails on Vercel but works locally**
+
+✅ **Solution**:
+1. Check Node.js version matches (`.node-version` file should have `20`)
+2. Make sure all dependencies are in `package.json`
+3. Run `npm install` and `npm run build` locally to verify
+
+### Runtime Errors
+
+**Widget Not Showing?**
 
 1. Open browser console (F12)
 2. Check for error messages
 3. Verify `data-api-base` and `data-experiment-id` are set
 4. Test if backend API is accessible
 
-### CORS Error?
+**CORS Error?**
 
-Ensure `vercel.json` has CORS headers configured:
+Ensure your **backend API** has CORS headers configured (see API Endpoints section).
 
-```json
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    }
-  ]
-}
-```
+The widget file itself already has CORS configured in `vercel.json`.
 
-### API Request Failed?
+**API Request Failed?**
 
 Test API accessibility:
-
 ```bash
 curl https://your-api.com/api/v1/experiments/exp_123/assign
 ```
 
 Check response format matches the expected schema.
 
-### Cache Issues?
+### Deployment Issues
 
-Use versioned URLs:
+**Vercel deployment times out**
 
+✅ **Solution**:
+- Default build timeout is 2 minutes (should be enough)
+- If needed, upgrade Vercel plan for longer timeouts
+- Check build logs for specific errors
+
+**Changes not reflecting after deployment**
+
+✅ **Solution**: Clear browser cache or use versioned URLs:
 ```html
 <script src="https://your-project.vercel.app/experiment-widget.js?v=20231213" ...>
 ```
+
+**Custom domain not working**
+
+✅ **Solution**:
+1. Verify DNS records are correctly configured
+2. Wait 5-10 minutes for DNS propagation
+3. Check Vercel dashboard for SSL certificate status
+4. Try accessing via `https://` (not `http://`)
 
 ---
 

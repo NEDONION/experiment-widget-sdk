@@ -395,38 +395,29 @@ experiment-widget-sdk/
 
 ## 部署
 
-### Vercel 配置
+### 快速部署到 Vercel
 
-在项目根目录创建 `vercel.json`:
+**方法 1：使用 Vercel CLI（推荐）**
 
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "headers": [
-    {
-      "source": "/experiment-widget.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        }
-      ]
-    }
-  ]
-}
+```bash
+# 全局安装 Vercel CLI
+npm install -g vercel
+
+# 登录 Vercel
+vercel login
+
+# 部署到生产环境
+vercel --prod
 ```
 
-### 通过 GitHub 部署
+部署完成后，你会得到一个 URL：
+```
+https://experiment-widget-sdk-xxx.vercel.app
+```
 
-1. 推送代码到 GitHub:
+**方法 2：通过 GitHub 部署**
 
+1. **推送到 GitHub**
 ```bash
 git init
 git add .
@@ -435,18 +426,57 @@ git remote add origin https://github.com/YOUR_USERNAME/experiment-widget-sdk.git
 git push -u origin main
 ```
 
-2. 导入到 Vercel:
+2. **导入到 Vercel**
    - 访问 [vercel.com/new](https://vercel.com/new)
-   - 选择你的 GitHub 仓库
-   - 点击 "Deploy"
+   - 连接你的 GitHub 账号
+   - 选择仓库
+   - Vercel 会自动检测配置
+   - 点击 **Deploy**
 
-### 自定义域名
+3. **自动部署**
+   - 每次推送到 `main` 分支都会触发新部署
+   - Pull Request 会生成预览部署
 
-1. 进入 Vercel 项目设置 > "Domains"
-2. 添加你的域名（例如：`widget.yourdomain.com`）
-3. 按照指引配置 DNS
-4. 使用自定义域名:
+### 配置文件
 
+项目已包含预配置文件：
+
+**vercel.json** - Vercel 部署设置
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "headers": [...]  // CORS 头已配置
+}
+```
+
+**.node-version** - Node.js 版本
+```
+20
+```
+
+**package.json** - 构建配置
+```json
+{
+  "scripts": {
+    "build": "vite build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+```
+
+### 使用自定义域名
+
+1. 在 Vercel 控制台进入你的项目
+2. 点击 **Settings** > **Domains**
+3. 添加你的域名：`widget.yourdomain.com`
+4. 按照 DNS 配置说明操作
+5. 等待 DNS 生效（通常 < 5 分钟）
+
+然后使用自定义域名：
 ```html
 <script
   src="https://widget.yourdomain.com/experiment-widget.js"
@@ -456,51 +486,115 @@ git push -u origin main
 </script>
 ```
 
+### 部署检查清单
+
+部署前确保：
+
+- [ ] 本地构建成功：`npm run build`
+- [ ] 生成了 `dist/experiment-widget.js`
+- [ ] 后端 API 支持 CORS（见 API 接口章节）
+- [ ] 项目根目录有 `vercel.json`
+- [ ] Git 仓库已初始化
+
+### 更新部署
+
+**自动更新（通过 GitHub）：**
+```bash
+git add .
+git commit -m "更新 widget"
+git push
+# Vercel 自动部署
+```
+
+**手动更新（通过 CLI）：**
+```bash
+vercel --prod
+```
+
 ---
 
 ## 常见问题
 
-### 插件没有显示？
+### 构建错误
+
+**错误：「Could not resolve entry module 'index.html'」**
+
+这个错误发生在 Vite 尝试查找 `index.html` 而不是使用库模式时。
+
+✅ **解决方案**：确保你的 `vite.config.ts` 包含：
+```typescript
+import { defineConfig } from 'vite';
+import path from 'path';
+
+export default defineConfig({
+  build: {
+    lib: {
+      entry: path.resolve(__dirname, 'src/index.ts'),
+      // ...
+    },
+  },
+});
+```
+
+并确保已安装 `@types/node`：
+```bash
+npm install -D @types/node
+```
+
+**错误：在 Vercel 上构建失败但本地成功**
+
+✅ **解决方案**：
+1. 检查 Node.js 版本是否匹配（`.node-version` 文件应该是 `20`）
+2. 确保所有依赖都在 `package.json` 中
+3. 本地运行 `npm install` 和 `npm run build` 验证
+
+### 运行时错误
+
+**插件没有显示？**
 
 1. 打开浏览器控制台（F12）
 2. 检查是否有错误提示
 3. 确认 `data-api-base` 和 `data-experiment-id` 已填写
 4. 检查后端 API 是否可访问
 
-### CORS 跨域错误？
+**CORS 跨域错误？**
 
-确保 `vercel.json` 中配置了 CORS 头:
+确保你的**后端 API** 配置了 CORS 响应头（见 API 接口章节）。
 
-```json
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    }
-  ]
-}
-```
+Widget 文件本身的 CORS 已经在 `vercel.json` 中配置好了。
 
-### API 请求失败？
+**API 请求失败？**
 
-测试 API 是否可访问:
-
+测试 API 是否可访问：
 ```bash
 curl https://your-api.com/api/v1/experiments/exp_123/assign
 ```
 
-检查返回格式是否正确。
+检查返回格式是否符合预期。
 
-### 缓存问题？
+### 部署问题
 
-使用带版本号的 URL:
+**Vercel 部署超时**
 
+✅ **解决方案**：
+- 默认构建超时是 2 分钟（应该足够）
+- 如需更长时间，升级 Vercel 套餐
+- 检查构建日志查看具体错误
+
+**部署后更改没有生效**
+
+✅ **解决方案**：清除浏览器缓存或使用带版本号的 URL：
 ```html
 <script src="https://your-project.vercel.app/experiment-widget.js?v=20231213" ...>
 ```
+
+**自定义域名不工作**
+
+✅ **解决方案**：
+1. 验证 DNS 记录配置正确
+2. 等待 5-10 分钟让 DNS 生效
+3. 检查 Vercel 控制台中的 SSL 证书状态
+4. 尝试使用 `https://`（不是 `http://`）
 
 ---
 
