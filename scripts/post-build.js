@@ -1,4 +1,4 @@
-import { readdirSync, copyFileSync, writeFileSync, statSync, readFileSync, existsSync } from 'fs';
+import { readdirSync, copyFileSync, writeFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -7,7 +7,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const distDir = join(__dirname, '../dist');
-const latestFilePath = join(distDir, 'LATEST.txt');
 
 // 查找带版本号和哈希的文件
 const files = readdirSync(distDir);
@@ -20,22 +19,12 @@ if (versionedFile) {
   // 复制为固定名称（方便本地开发和测试）
   copyFileSync(source, target);
 
-  // 计算下一次的自增版本号
-  let currentVersion = 0;
-  if (existsSync(latestFilePath)) {
-    try {
-      const latestContent = readFileSync(latestFilePath, 'utf-8').trim();
-      const match = latestContent.match(/experiment-widget\\.v(\\d+)\\.js/);
-      if (match) currentVersion = Number(match[1]) || 0;
-    } catch {
-      // ignore parse errors and fall back to 0
-    }
-  }
-  const nextVersion = currentVersion + 1;
-  const simpleVersionFile = `experiment-widget.v${nextVersion}.js`;
+  // 生成随机版本号（可读但不重复）
+  const randomSuffix = Math.random().toString(36).slice(2, 8);
+  const simpleVersionFile = `experiment-widget.v${randomSuffix}.js`;
   const simpleVersionPath = join(distDir, simpleVersionFile);
 
-  // 复制一份自增版本号的文件，给 CDN / 外部引用使用
+  // 复制一份随机版本号的文件，给 CDN / 外部引用使用
   copyFileSync(source, simpleVersionPath);
 
   // 获取文件大小
@@ -44,7 +33,7 @@ if (versionedFile) {
 
   // 生成版本信息文件
   const versionInfo = {
-    version: `v${nextVersion}`,
+    version: `v${randomSuffix}`,
     filename: simpleVersionFile,
     sourceFilename: versionedFile,
     buildTime: new Date().toISOString(),
