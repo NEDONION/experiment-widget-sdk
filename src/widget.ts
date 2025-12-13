@@ -158,6 +158,10 @@ export class ExpWidget {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('❌❌❌ [ASSIGNMENT FAILED] ❌❌❌');
+      console.error('❌ Experiment ID:', this.config.experimentId);
+      console.error('❌ Error:', message);
+      console.error('❌ Full error:', error);
       status.textContent = `Assignment error: ${message}`;
     }
   }

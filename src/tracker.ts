@@ -89,7 +89,11 @@ export class ImpressionTracker {
     console.log('[Impression] Sending:', payload);
 
     this.apiClient.post(`/experiments/${this.experimentId}/hit`, payload).catch((error) => {
-      console.error('[Impression] Failed:', error);
+      console.error('❌❌❌ [IMPRESSION FAILED] ❌❌❌');
+      console.error('❌ Creative ID:', creativeId);
+      console.error('❌ Experiment ID:', this.experimentId);
+      console.error('❌ Error:', error.message);
+      console.error('❌ Full error:', error);
     });
   }
 
