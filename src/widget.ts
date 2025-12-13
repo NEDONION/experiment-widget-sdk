@@ -1,7 +1,7 @@
 import { ApiClient } from './api';
 import { ImpressionTracker, ClickTracker } from './tracker';
 import { widgetStyles } from './styles';
-import type { WidgetConfig, AssignData } from './types';
+import type { WidgetConfig, AssignData, ApiResponse } from './types';
 
 export class ExpWidget {
   private config: WidgetConfig;
@@ -147,12 +147,14 @@ export class ExpWidget {
         ? `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         : (this.config.userKey || this.anonId);
 
-      const data = await this.apiClient.get<AssignData>(
+      const data = await this.apiClient.get<AssignData | ApiResponse<AssignData>>(
         `/experiments/${this.config.experimentId}/assign?user_key=${encodeURIComponent(userKey)}`
       );
 
-      if (data && data.creative_id) {
-        this.renderCreative(data);
+      const creative = this.extractCreativePayload(data);
+
+      if (creative) {
+        this.renderCreative(creative);
       } else {
         status.textContent = 'No creative assigned';
       }
@@ -167,7 +169,8 @@ export class ExpWidget {
   }
 
   private renderCreative(data: AssignData): void {
-    this.creativeId = data.creative_id;
+    const normalizedCreativeId = this.normalizeCreativeId(data.creative_id);
+    this.creativeId = normalizedCreativeId;
 
     const status = this.shadowRoot.getElementById('status');
     const card = this.shadowRoot.getElementById('card');
@@ -202,7 +205,7 @@ export class ExpWidget {
     card.classList.add('visible');
 
     // Start tracking impression
-    this.impressionTracker.track(card, this.creativeId);
+    this.impressionTracker.track(card, normalizedCreativeId);
   }
 
   private handleCardClick(): void {
@@ -233,5 +236,34 @@ export class ExpWidget {
     }
 
     this.container.remove();
+  }
+
+  // 将字符串数字转换为 number，避免后端要求整型时解析失败
+  private normalizeCreativeId(id: string | number): string | number {
+    if (typeof id === 'string') {
+      const numeric = Number(id);
+      if (!Number.isNaN(numeric) && Number.isFinite(numeric)) {
+        return numeric;
+      }
+    }
+    return id;
+  }
+
+  // 兼容 API 返回两种格式：
+  // 1) 直接返回创意字段 { creative_id, ... }
+  // 2) 包一层 { code, data: { creative_id, ... } }
+  private extractCreativePayload(
+    data: AssignData | ApiResponse<AssignData>
+  ): AssignData | null {
+    if ((data as AssignData)?.creative_id) {
+      return data as AssignData;
+    }
+    if (
+      (data as ApiResponse<AssignData>)?.data &&
+      (data as ApiResponse<AssignData>).data?.creative_id
+    ) {
+      return (data as ApiResponse<AssignData>).data as AssignData;
+    }
+    return null;
   }
 }

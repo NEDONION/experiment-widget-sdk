@@ -1,5 +1,16 @@
 import type { ApiClient } from './api';
 
+// Normalize creative_id to number when possible to satisfy backends expecting numeric IDs.
+const normalizeCreativeId = (id: string | number): string | number => {
+  if (typeof id === 'string') {
+    const numeric = Number(id);
+    if (!Number.isNaN(numeric) && Number.isFinite(numeric)) {
+      return numeric;
+    }
+  }
+  return id;
+};
+
 export class ImpressionTracker {
   private observer: IntersectionObserver | null = null;
   private trackedIds = new Set<string | number>();
@@ -15,10 +26,12 @@ export class ImpressionTracker {
   }
 
   track(element: Element, creativeId: string | number): void {
+    const normalizedCreativeId = normalizeCreativeId(creativeId);
+
     console.log('[Impression] Starting to track element:', element, 'creative_id:', creativeId);
 
-    if (this.trackedIds.has(creativeId)) {
-      console.log('[Impression] Already tracked, skipping:', creativeId);
+    if (this.trackedIds.has(normalizedCreativeId)) {
+      console.log('[Impression] Already tracked, skipping:', normalizedCreativeId);
       return;
     }
 
@@ -70,27 +83,29 @@ export class ImpressionTracker {
       );
     }
 
-    element.setAttribute('data-creative-id', String(creativeId));
-    console.log('[Impression] Observing element with creative_id:', creativeId);
+    element.setAttribute('data-creative-id', String(normalizedCreativeId));
+    console.log('[Impression] Observing element with creative_id:', normalizedCreativeId);
     this.observer.observe(element);
   }
 
   private sendImpression(creativeId: string | number): void {
-    if (this.trackedIds.has(creativeId)) {
+    const normalizedCreativeId = normalizeCreativeId(creativeId);
+
+    if (this.trackedIds.has(normalizedCreativeId)) {
       return;
     }
 
-    this.trackedIds.add(creativeId);
+    this.trackedIds.add(normalizedCreativeId);
 
     const payload = {
-      creative_id: creativeId,
+      creative_id: normalizedCreativeId,
     };
 
     console.log('[Impression] Sending:', payload);
 
     this.apiClient.post(`/experiments/${this.experimentId}/hit`, payload).catch((error) => {
       console.error('❌❌❌ [IMPRESSION FAILED] ❌❌❌');
-      console.error('❌ Creative ID:', creativeId);
+      console.error('❌ Creative ID:', normalizedCreativeId);
       console.error('❌ Experiment ID:', this.experimentId);
       console.error('❌ Error:', error.message);
       console.error('❌ Full error:', error);
@@ -120,8 +135,10 @@ export class ClickTracker {
   }
 
   track(creativeId: string | number): void {
+    const normalizedCreativeId = normalizeCreativeId(creativeId);
+
     const payload = {
-      creative_id: creativeId,
+      creative_id: normalizedCreativeId,
     };
 
     console.log('[Click] Sending:', payload);
