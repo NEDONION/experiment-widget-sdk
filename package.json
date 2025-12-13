@@ -1,0 +1,26 @@
+{
+  "name": "experiment-widget-sdk",
+  "version": "1.0.0",
+  "main": "dist/experiment-widget.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "experiment",
+    "ab-testing",
+    "widget",
+    "sdk",
+    "impression",
+    "tracking"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Lightweight experiment widget SDK with impression and click tracking",
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  }
+}

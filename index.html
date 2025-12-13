@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Experiment Widget SDK Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #1a202c;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #4a5568;
+      margin-bottom: 16px;
+    }
+    .code-block {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      color: #2d3748;
+    }
+    .note {
+      background: #fef5e7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .note strong {
+      color: #d97706;
+    }
+  </style>
+</head>
+<body>
+  <h1>Experiment Widget SDK Demo</h1>
+  <p>This page demonstrates the Experiment Widget SDK integration.</p>
+
+  <div class="note">
+    <strong>Note:</strong> The widget is loaded via the script tag below.
+    Make sure your backend API is running at the specified endpoint.
+  </div>
+
+  <h2>How to Use</h2>
+  <p>Simply add this script tag to any webpage:</p>
+
+  <div class="code-block">
+    <code>&lt;script<br>
+  src="https://cdn.example.com/experiment-widget.js"<br>
+  data-api-base="http://localhost:4000/api/v1"<br>
+  data-experiment-id="exp_123"<br>
+  data-user-key=""<br>
+  async&gt;<br>
+&lt;/script&gt;</code>
+  </div>
+
+  <h2>Parameters</h2>
+  <ul>
+    <li><strong>data-api-base</strong>: Your backend API base URL</li>
+    <li><strong>data-experiment-id</strong>: The experiment ID to run</li>
+    <li><strong>data-user-key</strong>: Optional user identifier</li>
+  </ul>
+
+  <h2>Page Content</h2>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+  <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+
+  <!-- Widget Script -->
+  <script
+    src="/src/index.ts"
+    data-api-base="http://localhost:4000/api/v1"
+    data-experiment-id="exp_123"
+    data-user-key=""
+    type="module">
+  </script>
+</body>
+</html>
