@@ -50,6 +50,7 @@ Add this script tag to any webpage:
   data-api-base="https://api.example.com/api/v1"
   data-experiment-id="exp_123"
   data-user-key="optional_user_id"
+  data-random-assignment="true"
   async>
 </script>
 ```
@@ -62,6 +63,7 @@ Add this script tag to any webpage:
 | `data-api-base` | Yes | Backend API base URL |
 | `data-experiment-id` | Yes | Experiment ID |
 | `data-user-key` | No | User identifier (optional) |
+| `data-random-assignment` | No | Enable random assignment. Set to `"true"` to get a different creative on each page load (useful for testing) |
 | `async` | Recommended | Async loading, non-blocking |
 
 ---

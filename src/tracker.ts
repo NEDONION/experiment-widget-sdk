@@ -15,23 +15,39 @@ export class ImpressionTracker {
   }
 
   track(element: Element, creativeId: string | number): void {
+    console.log('[Impression] Starting to track element:', element, 'creative_id:', creativeId);
+
     if (this.trackedIds.has(creativeId)) {
+      console.log('[Impression] Already tracked, skipping:', creativeId);
       return;
     }
 
     if (!this.observer) {
+      console.log('[Impression] Creating IntersectionObserver');
       this.observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             const el = entry.target;
             const cid = el.getAttribute('data-creative-id');
 
-            if (!cid) return;
+            console.log('[Impression] Observer callback:', {
+              creative_id: cid,
+              isIntersecting: entry.isIntersecting,
+              intersectionRatio: entry.intersectionRatio,
+              boundingClientRect: entry.boundingClientRect,
+            });
+
+            if (!cid) {
+              console.warn('[Impression] No creative_id attribute found on element');
+              return;
+            }
 
             if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
               // Start timer for 500ms visibility
               if (!this.timers.has(el)) {
+                console.log('[Impression] Element visible ≥50%, starting 500ms timer for:', cid);
                 const timer = window.setTimeout(() => {
+                  console.log('[Impression] Timer fired, sending impression for:', cid);
                   this.sendImpression(cid);
                   this.timers.delete(el);
                 }, 500);
@@ -41,6 +57,7 @@ export class ImpressionTracker {
               // Clear timer if element is no longer visible
               const timer = this.timers.get(el);
               if (timer) {
+                console.log('[Impression] Element no longer visible, clearing timer for:', cid);
                 window.clearTimeout(timer);
                 this.timers.delete(el);
               }
@@ -54,6 +71,7 @@ export class ImpressionTracker {
     }
 
     element.setAttribute('data-creative-id', String(creativeId));
+    console.log('[Impression] Observing element with creative_id:', creativeId);
     this.observer.observe(element);
   }
 
@@ -64,13 +82,14 @@ export class ImpressionTracker {
 
     this.trackedIds.add(creativeId);
 
-    this.apiClient.post(`/experiments/${this.experimentId}/hit`, {
+    const payload = {
       creative_id: creativeId,
-      anon_id: this.anonId,
-      ts: Date.now(),
-      page_url: window.location.href,
-    }).catch(() => {
-      // Silent fail
+    };
+
+    console.log('[Impression] Sending:', payload);
+
+    this.apiClient.post(`/experiments/${this.experimentId}/hit`, payload).catch((error) => {
+      console.error('[Impression] Failed:', error);
     });
   }
 
@@ -97,11 +116,12 @@ export class ClickTracker {
   }
 
   track(creativeId: string | number): void {
-    this.apiClient.sendBeacon(`/experiments/${this.experimentId}/click`, {
+    const payload = {
       creative_id: creativeId,
-      anon_id: this.anonId,
-      ts: Date.now(),
-      page_url: window.location.href,
-    });
+    };
+
+    console.log('[Click] Sending:', payload);
+
+    this.apiClient.sendBeacon(`/experiments/${this.experimentId}/click`, payload);
   }
 }

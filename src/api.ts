@@ -1,5 +1,3 @@
-import type { ApiResponse } from './types';
-
 export class ApiClient {
   private baseUrl: string;
 
@@ -7,7 +5,7 @@ export class ApiClient {
     this.baseUrl = baseUrl.replace(/\/$/, '');
   }
 
-  async get<T>(path: string): Promise<ApiResponse<T>> {
+  async get<T>(path: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: 'GET',
       mode: 'cors',
@@ -24,7 +22,7 @@ export class ApiClient {
     return response.json();
   }
 
-  async post<T>(path: string, body?: Record<string, unknown>): Promise<ApiResponse<T>> {
+  async post<T>(path: string, body?: Record<string, unknown>): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: 'POST',
       mode: 'cors',
@@ -36,7 +34,23 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      // Try to get error details from response
+      let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        console.error('[API Error]', errorData);
+        errorMessage += ` - ${JSON.stringify(errorData)}`;
+      } catch {
+        // If response is not JSON, try to get text
+        try {
+          const errorText = await response.text();
+          console.error('[API Error]', errorText);
+          errorMessage += ` - ${errorText}`;
+        } catch {
+          // Ignore if we can't read the error
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();

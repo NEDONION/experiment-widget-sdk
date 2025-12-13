@@ -50,6 +50,7 @@ vercel --prod
   data-api-base="https://api.example.com/api/v1"
   data-experiment-id="exp_123"
   data-user-key="optional_user_id"
+  data-random-assignment="true"
   async>
 </script>
 ```
@@ -62,6 +63,7 @@ vercel --prod
 | `data-api-base` | 是 | 后端 API 基地址 |
 | `data-experiment-id` | 是 | 实验 ID |
 | `data-user-key` | 否 | 用户标识（可选） |
+| `data-random-assignment` | 否 | 启用随机分配。设置为 `"true"` 时每次页面加载都会获取不同的创意（用于测试） |
 | `async` | 推荐 | 异步加载，不阻塞页面渲染 |
 
 ---

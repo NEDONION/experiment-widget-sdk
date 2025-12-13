@@ -147,14 +147,14 @@ export class ExpWidget {
         ? `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         : (this.config.userKey || this.anonId);
 
-      const response = await this.apiClient.get<AssignData>(
+      const data = await this.apiClient.get<AssignData>(
         `/experiments/${this.config.experimentId}/assign?user_key=${encodeURIComponent(userKey)}`
       );
 
-      if (response.code === 0 && response.data) {
-        this.renderCreative(response.data);
+      if (data && data.creative_id) {
+        this.renderCreative(data);
       } else {
-        status.textContent = response.message || 'Assignment failed';
+        status.textContent = 'No creative assigned';
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
