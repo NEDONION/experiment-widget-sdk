@@ -11,6 +11,7 @@ export class ApiClient {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: 'GET',
       mode: 'cors',
+      credentials: 'omit',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -27,6 +28,7 @@ export class ApiClient {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: 'POST',
       mode: 'cors',
+      credentials: 'omit',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -42,15 +44,12 @@ export class ApiClient {
 
   sendBeacon(path: string, data: Record<string, unknown>): boolean {
     const url = `${this.baseUrl}${path}`;
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
 
-    if (navigator.sendBeacon) {
-      return navigator.sendBeacon(url, blob);
-    }
-
-    // Fallback to fetch with keepalive
+    // Use fetch with keepalive instead of sendBeacon to avoid credentials issue
     fetch(url, {
       method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
       headers: {
         'Content-Type': 'application/json',
       },
