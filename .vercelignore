@@ -3,7 +3,6 @@ node_modules
 .idea
 *.log
 .DS_Store
-src
 *.md
 example.html
 index.html
