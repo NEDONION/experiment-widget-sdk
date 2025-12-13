@@ -7,10 +7,10 @@ export const widgetStyles = `
 
   .exp-widget-container {
     position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: auto;
-    top: auto;
+    top: 20px;
+    right: 20px;
+    bottom: auto;
+    left: auto;
     transform: none;
     z-index: 999999;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -196,10 +196,10 @@ export const widgetStyles = `
 
   .exp-widget-toast {
     position: fixed;
-    bottom: 80px;
-    left: 20px;
-    right: auto;
-    top: auto;
+    top: 100px;
+    right: 20px;
+    bottom: auto;
+    left: auto;
     transform: none;
     background: #0f172a;
     color: white;
