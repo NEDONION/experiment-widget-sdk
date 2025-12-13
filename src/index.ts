@@ -1,5 +1,5 @@
 import { ExpWidget } from './widget';
-import type { WidgetConfig } from './types';
+import type { WidgetConfig, WidgetPosition } from './types';
 
 // IIFE - Self-executing function
 (function initExperimentWidget() {
@@ -24,6 +24,7 @@ import type { WidgetConfig } from './types';
   const experimentId = currentScript.dataset.experimentId;
   const userKey = currentScript.dataset.userKey;
   const randomAssignment = currentScript.dataset.randomAssignment === 'true';
+  const position = (currentScript.dataset.position as WidgetPosition) || 'bottom-right';
 
   // Validate required parameters
   if (!apiBase) {
@@ -41,6 +42,7 @@ import type { WidgetConfig } from './types';
     experimentId,
     userKey,
     randomAssignment,
+    position,
   };
 
   // Wait for DOM to be ready

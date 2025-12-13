@@ -4,7 +4,5 @@ node_modules
 *.log
 .DS_Store
 *.md
-example.html
-index.html
 CORS_CHECK.md
 ASSIGNMENT_STRATEGY.md
