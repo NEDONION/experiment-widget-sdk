@@ -217,6 +217,79 @@ npm run preview
 
 插件需要后端提供以下接口：
 
+### ⚠️ 重要：后端 CORS 配置
+
+你的后端 API **必须**支持 CORS，以允许插件从任何域名发起请求。在你的 API 响应中添加以下 headers：
+
+```
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Accept
+Access-Control-Max-Age: 86400
+```
+
+**配置示例：**
+
+<details>
+<summary>Node.js / Express</summary>
+
+```javascript
+const cors = require('cors');
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept'],
+  maxAge: 86400
+}));
+```
+</details>
+
+<details>
+<summary>Next.js API Routes</summary>
+
+```javascript
+export default function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  // 你的 API 逻辑
+}
+```
+</details>
+
+<details>
+<summary>Python / Flask</summary>
+
+```python
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+```
+</details>
+
+<details>
+<summary>Nginx</summary>
+
+```nginx
+add_header Access-Control-Allow-Origin *;
+add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+add_header Access-Control-Allow-Headers 'Content-Type, Accept';
+add_header Access-Control-Max-Age 86400;
+
+if ($request_method = 'OPTIONS') {
+    return 204;
+}
+```
+</details>
+
 ### 1. 获取实验内容
 
 ```

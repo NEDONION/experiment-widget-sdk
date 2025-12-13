@@ -138,7 +138,11 @@ export class ExpWidget {
     card.classList.remove('visible');
 
     try {
-      const userKey = this.config.userKey || '';
+      // 如果启用随机分配，每次使用不同的随机ID
+      const userKey = this.config.randomAssignment
+        ? `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        : (this.config.userKey || this.anonId);
+
       const response = await this.apiClient.get<AssignData>(
         `/experiments/${this.config.experimentId}/assign?user_key=${encodeURIComponent(userKey)}`
       );

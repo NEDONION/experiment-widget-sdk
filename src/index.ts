@@ -23,6 +23,7 @@ import type { WidgetConfig } from './types';
   const apiBase = currentScript.dataset.apiBase;
   const experimentId = currentScript.dataset.experimentId;
   const userKey = currentScript.dataset.userKey;
+  const randomAssignment = currentScript.dataset.randomAssignment === 'true';
 
   // Validate required parameters
   if (!apiBase) {
@@ -39,6 +40,7 @@ import type { WidgetConfig } from './types';
     apiBase,
     experimentId,
     userKey,
+    randomAssignment,
   };
 
   // Wait for DOM to be ready

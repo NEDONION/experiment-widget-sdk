@@ -217,6 +217,79 @@ Visit: `http://localhost:4173`
 
 The widget requires the following backend endpoints:
 
+### ⚠️ Important: Backend CORS Configuration
+
+Your backend API **must** support CORS to allow the widget to make requests from any domain. Add these headers to your API responses:
+
+```
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Accept
+Access-Control-Max-Age: 86400
+```
+
+**Example configurations:**
+
+<details>
+<summary>Node.js / Express</summary>
+
+```javascript
+const cors = require('cors');
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept'],
+  maxAge: 86400
+}));
+```
+</details>
+
+<details>
+<summary>Next.js API Routes</summary>
+
+```javascript
+export default function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  // Your API logic here
+}
+```
+</details>
+
+<details>
+<summary>Python / Flask</summary>
+
+```python
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+```
+</details>
+
+<details>
+<summary>Nginx</summary>
+
+```nginx
+add_header Access-Control-Allow-Origin *;
+add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+add_header Access-Control-Allow-Headers 'Content-Type, Accept';
+add_header Access-Control-Max-Age 86400;
+
+if ($request_method = 'OPTIONS') {
+    return 204;
+}
+```
+</details>
+
 ### 1. Get Experiment Content
 
 ```

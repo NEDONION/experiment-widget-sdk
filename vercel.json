@@ -5,7 +5,7 @@
   "framework": "vite",
   "headers": [
     {
-      "source": "/experiment-widget.js",
+      "source": "/(.*\\.js)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -21,7 +21,11 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type"
+          "value": "Content-Type, Accept"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     },
@@ -34,7 +38,7 @@
         },
         {
           "key": "X-Frame-Options",
-          "value": "DENY"
+          "value": "SAMEORIGIN"
         },
         {
           "key": "X-XSS-Protection",

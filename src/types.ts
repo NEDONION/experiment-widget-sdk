@@ -2,6 +2,7 @@ export interface WidgetConfig {
   apiBase: string;
   experimentId: string;
   userKey?: string;
+  randomAssignment?: boolean; // true: 每次随机, false: 固定分配
 }
 
 export interface AssignData {
