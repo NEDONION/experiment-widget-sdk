@@ -7,7 +7,6 @@ export interface WidgetConfig {
 }
 
 export type WidgetPosition =
-  | 'bottom-right'
   | 'bottom-left'
   | 'top-right'
   | 'top-left'

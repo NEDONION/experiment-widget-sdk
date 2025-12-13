@@ -24,7 +24,15 @@ import type { WidgetConfig, WidgetPosition } from './types';
   const experimentId = currentScript.dataset.experimentId;
   const userKey = currentScript.dataset.userKey;
   const randomAssignment = currentScript.dataset.randomAssignment === 'true';
-  const position = (currentScript.dataset.position as WidgetPosition) || 'bottom-right';
+  const rawPosition = currentScript.dataset.position;
+  const normalizedPosition = rawPosition
+    ? rawPosition
+        .replace(/([a-z])([A-Z])/g, '$1-$2')
+        .replace(/_/g, '-')
+        .toLowerCase()
+        .trim()
+    : undefined;
+  const position = (normalizedPosition as WidgetPosition) || 'bottom-left';
 
   // Validate required parameters
   if (!apiBase) {

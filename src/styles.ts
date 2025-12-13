@@ -8,9 +8,9 @@ export const widgetStyles = `
   .exp-widget-container {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    left: 20px;
+    right: auto;
     top: auto;
-    left: auto;
     transform: none;
     z-index: 999999;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;

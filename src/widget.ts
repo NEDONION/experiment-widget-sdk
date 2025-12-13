@@ -235,7 +235,8 @@ export class ExpWidget {
     this.container.remove();
   }
 
-  private getPositionClass(position?: WidgetPosition): string {
+  private getPositionClass(position?: WidgetPosition | string): string {
+    const normalized = this.normalizePosition(position);
     const allowed: WidgetPosition[] = [
       'bottom-right',
       'bottom-left',
@@ -245,10 +246,31 @@ export class ExpWidget {
       'right',
     ];
 
-    if (position && allowed.includes(position)) {
-      return `pos-${position}`;
+    if (normalized && allowed.includes(normalized)) {
+      return `pos-${normalized}`;
     }
 
     return 'pos-bottom-right';
+  }
+
+  private normalizePosition(position?: string): WidgetPosition | null {
+    if (!position) return null;
+    const normalized = position
+      .replace(/([a-z])([A-Z])/g, '$1-$2')
+      .replace(/_/g, '-')
+      .toLowerCase()
+      .trim();
+
+    const allowed: WidgetPosition[] = [
+      'bottom-left',
+      'top-right',
+      'top-left',
+      'left',
+      'right',
+    ];
+
+    return allowed.includes(normalized as WidgetPosition)
+      ? (normalized as WidgetPosition)
+      : null;
   }
 }
