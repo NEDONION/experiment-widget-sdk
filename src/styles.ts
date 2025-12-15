@@ -7,7 +7,7 @@ export const widgetStyles = `
 
   .exp-widget-container {
     position: fixed;
-    top: 20px;
+    top: 160px;
     right: 20px;
     bottom: auto;
     left: auto;
@@ -196,7 +196,7 @@ export const widgetStyles = `
 
   .exp-widget-toast {
     position: fixed;
-    top: 100px;
+    top: 160px;
     right: 20px;
     bottom: auto;
     left: auto;
