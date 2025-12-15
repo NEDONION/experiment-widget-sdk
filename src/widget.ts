@@ -198,6 +198,12 @@ export class ExpWidget {
       console.error('❌ Experiment ID:', this.config.experimentId);
       console.error('❌ Error:', message);
       console.error('❌ Full error:', error);
+      const fallback = this.cachedCreative || this.loadCachedCreative(true);
+      if (fallback) {
+        this.hasCachedRender = true;
+        this.renderCreative(fallback);
+        return;
+      }
       if (!this.hasCachedRender) {
         status.textContent = `Assignment error: ${message}`;
       }
@@ -318,7 +324,7 @@ export class ExpWidget {
     return `exp_widget_cache_${this.config.experimentId}_${userKey}`;
   }
 
-  private loadCachedCreative(): AssignData | null {
+  private loadCachedCreative(allowExpired = false): AssignData | null {
     if (!this.cacheKey || this.cacheTTL === 0) return null;
 
     try {
@@ -332,8 +338,10 @@ export class ExpWidget {
 
       const isExpired = Date.now() - cached.ts > this.cacheTTL;
       if (isExpired) {
-        localStorage.removeItem(this.cacheKey);
-        return null;
+        if (!allowExpired) {
+          localStorage.removeItem(this.cacheKey);
+          return null;
+        }
       }
 
       return cached.data;
