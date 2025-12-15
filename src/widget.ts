@@ -9,6 +9,10 @@ export class ExpWidget {
   private impressionTracker: ImpressionTracker;
   private clickTracker: ClickTracker;
   private anonId: string;
+  private cacheKey: string | null;
+  private cacheTTL: number;
+  private hasCachedRender = false;
+  private cachedCreative: AssignData | null = null;
   private container: HTMLElement;
   private shadowRoot: ShadowRoot;
   private creativeId: string | number | null = null;
@@ -29,6 +33,11 @@ export class ExpWidget {
       config.experimentId,
       this.anonId
     );
+    const ttlFromConfig = Number.isFinite(this.config.cacheTTL)
+      ? (this.config.cacheTTL as number)
+      : 10 * 60 * 1000;
+    this.cacheTTL = Math.max(0, ttlFromConfig);
+    this.cacheKey = this.shouldUseCache() ? this.buildCacheKey() : null;
 
     // Create container and shadow DOM
     this.container = document.createElement('div');
@@ -43,8 +52,16 @@ export class ExpWidget {
     // Create UI
     this.createUI();
 
+    const cachedCreative = this.loadCachedCreative();
+    this.cachedCreative = cachedCreative;
+
     // Append to body
     document.body.appendChild(this.container);
+
+    if (cachedCreative) {
+      this.hasCachedRender = true;
+      this.renderCreative(cachedCreative);
+    }
 
     // Start assignment
     this.assign();
@@ -137,9 +154,13 @@ export class ExpWidget {
 
     if (!status || !card) return;
 
-    status.style.display = 'block';
-    status.textContent = 'Assigning...';
-    card.classList.remove('visible');
+    if (!this.hasCachedRender) {
+      status.style.display = 'block';
+      status.textContent = 'Assigning...';
+      card.classList.remove('visible');
+    } else {
+      status.style.display = 'none';
+    }
 
     try {
       // 如果启用随机分配，每次使用不同的随机ID
@@ -154,6 +175,19 @@ export class ExpWidget {
       const creative = this.extractCreativePayload(data);
 
       if (creative) {
+        const isSameCreative = this.cachedCreative
+          ? this.isSameCreative(this.cachedCreative, creative)
+          : false;
+
+        if (isSameCreative) {
+          this.cachedCreative = creative;
+          this.refreshCacheTimestamp();
+          return;
+        }
+
+        this.cachedCreative = creative;
+        this.saveCreativeToCache(creative);
+        this.hasCachedRender = false;
         this.renderCreative(creative);
       } else {
         status.textContent = 'No creative assigned';
@@ -164,7 +198,9 @@ export class ExpWidget {
       console.error('❌ Experiment ID:', this.config.experimentId);
       console.error('❌ Error:', message);
       console.error('❌ Full error:', error);
-      status.textContent = `Assignment error: ${message}`;
+      if (!this.hasCachedRender) {
+        status.textContent = `Assignment error: ${message}`;
+      }
     }
   }
 
@@ -266,4 +302,82 @@ export class ExpWidget {
     }
     return null;
   }
+
+  private shouldUseCache(): boolean {
+    if (this.config.disableCache) {
+      return false;
+    }
+    if (this.config.randomAssignment) {
+      return false;
+    }
+    return true;
+  }
+
+  private buildCacheKey(): string {
+    const userKey = this.config.userKey || this.anonId;
+    return `exp_widget_cache_${this.config.experimentId}_${userKey}`;
+  }
+
+  private loadCachedCreative(): AssignData | null {
+    if (!this.cacheKey || this.cacheTTL === 0) return null;
+
+    try {
+      const raw = localStorage.getItem(this.cacheKey);
+      if (!raw) return null;
+
+      const cached: CachedCreative = JSON.parse(raw);
+      if (!cached?.data || !cached.ts) {
+        return null;
+      }
+
+      const isExpired = Date.now() - cached.ts > this.cacheTTL;
+      if (isExpired) {
+        localStorage.removeItem(this.cacheKey);
+        return null;
+      }
+
+      return cached.data;
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to read cache', error);
+      return null;
+    }
+  }
+
+  private saveCreativeToCache(data: AssignData): void {
+    if (!this.cacheKey || this.cacheTTL === 0) return;
+
+    const payload: CachedCreative = {
+      data,
+      ts: Date.now(),
+    };
+
+    try {
+      localStorage.setItem(this.cacheKey, JSON.stringify(payload));
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to save cache', error);
+    }
+  }
+
+  private refreshCacheTimestamp(): void {
+    if (!this.cacheKey || this.cacheTTL === 0) return;
+    try {
+      const raw = localStorage.getItem(this.cacheKey);
+      if (!raw) return;
+      const cached: CachedCreative = JSON.parse(raw);
+      if (!cached?.data) return;
+      cached.ts = Date.now();
+      localStorage.setItem(this.cacheKey, JSON.stringify(cached));
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to refresh cache timestamp', error);
+    }
+  }
+
+  private isSameCreative(a: AssignData, b: AssignData): boolean {
+    return this.normalizeCreativeId(a.creative_id) === this.normalizeCreativeId(b.creative_id);
+  }
+}
+
+interface CachedCreative {
+  data: AssignData;
+  ts: number;
 }

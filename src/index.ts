@@ -24,6 +24,10 @@ import type { WidgetConfig } from './types';
   const experimentId = currentScript.dataset.experimentId;
   const userKey = currentScript.dataset.userKey;
   const randomAssignment = currentScript.dataset.randomAssignment === 'true';
+  const cacheTTLAttr = currentScript.dataset.cacheTtl;
+  const disableCache = currentScript.dataset.disableCache === 'true';
+  const cacheTTLParsed = cacheTTLAttr ? Number(cacheTTLAttr) : undefined;
+  const cacheTTL = Number.isFinite(cacheTTLParsed) ? cacheTTLParsed : undefined;
 
   // Validate required parameters
   if (!apiBase) {
@@ -41,6 +45,8 @@ import type { WidgetConfig } from './types';
     experimentId,
     userKey,
     randomAssignment,
+    cacheTTL,
+    disableCache,
   };
 
   // Wait for DOM to be ready
