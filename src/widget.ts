@@ -35,7 +35,7 @@ export class ExpWidget {
     );
     const ttlFromConfig = Number.isFinite(this.config.cacheTTL)
       ? (this.config.cacheTTL as number)
-      : 10 * 60 * 1000;
+      : 60 * 60 * 1000;
     this.cacheTTL = Math.max(0, ttlFromConfig);
     this.cacheKey = this.shouldUseCache() ? this.buildCacheKey() : null;
 
@@ -237,8 +237,7 @@ export class ExpWidget {
     desc.textContent = data.cta_text || 'Learn more';
 
     if (data.image_url) {
-      thumbnail.style.backgroundImage = `url(${data.image_url})`;
-      thumbnail.style.backgroundSize = 'cover';
+      this.applyThumbnailImage(thumbnail, data.image_url, normalizedCreativeId);
     } else {
       thumbnail.style.backgroundImage = 'linear-gradient(135deg, #38bdf8, #a78bfa)';
       thumbnail.style.backgroundSize = 'auto';
@@ -383,9 +382,132 @@ export class ExpWidget {
   private isSameCreative(a: AssignData, b: AssignData): boolean {
     return this.normalizeCreativeId(a.creative_id) === this.normalizeCreativeId(b.creative_id);
   }
+
+  private applyThumbnailImage(
+    element: HTMLElement,
+    imageUrl: string,
+    creativeId: string | number
+  ): void {
+    const cached = this.loadCachedImage(imageUrl);
+    if (cached) {
+      element.style.backgroundImage = `url(${cached})`;
+      element.style.backgroundSize = 'cover';
+      return;
+    }
+
+    element.style.backgroundImage = `url(${imageUrl})`;
+    element.style.backgroundSize = 'cover';
+
+    this.cacheImage(imageUrl, creativeId, element).catch((error) => {
+      console.warn('[ExperimentWidget] Failed to cache image', error);
+    });
+  }
+
+  private buildImageCacheKey(imageUrl: string): string | null {
+    if (!this.cacheKey) return null;
+    try {
+      const encodedUrl = btoa(encodeURIComponent(imageUrl));
+      return `${this.cacheKey}_img_${encodedUrl}`;
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to build image cache key', error);
+      return null;
+    }
+  }
+
+  private loadCachedImage(imageUrl: string): string | null {
+    if (!this.cacheKey || this.cacheTTL === 0) return null;
+    const key = this.buildImageCacheKey(imageUrl);
+    if (!key) return null;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const cached: CachedImage = JSON.parse(raw);
+      if (!cached?.data || !cached.ts) return null;
+
+      const isExpired = Date.now() - cached.ts > this.cacheTTL;
+      if (isExpired) {
+        localStorage.removeItem(key);
+        return null;
+      }
+
+      return cached.data;
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to read image cache', error);
+      return null;
+    }
+  }
+
+  private saveImageToCache(imageUrl: string, dataUrl: string): void {
+    if (!this.cacheKey || this.cacheTTL === 0) return;
+    const key = this.buildImageCacheKey(imageUrl);
+    if (!key) return;
+
+    const payload: CachedImage = {
+      data: dataUrl,
+      ts: Date.now(),
+    };
+
+    try {
+      localStorage.setItem(key, JSON.stringify(payload));
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to save image cache', error);
+    }
+  }
+
+  private async cacheImage(
+    imageUrl: string,
+    creativeId: string | number,
+    element: HTMLElement
+  ): Promise<void> {
+    if (!this.cacheKey || this.cacheTTL === 0) return;
+    if (this.loadCachedImage(imageUrl)) return;
+
+    try {
+      const dataUrl = await this.fetchImageAsDataURL(imageUrl);
+      if (!dataUrl) return;
+      this.saveImageToCache(imageUrl, dataUrl);
+      if (this.creativeId === creativeId) {
+        element.style.backgroundImage = `url(${dataUrl})`;
+        element.style.backgroundSize = 'cover';
+      }
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to fetch image for cache', error);
+    }
+  }
+
+  private async fetchImageAsDataURL(imageUrl: string): Promise<string | null> {
+    try {
+      const response = await fetch(imageUrl, { mode: 'cors' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blob = await response.blob();
+      return await this.blobToDataUrl(blob);
+    } catch (error) {
+      console.warn('[ExperimentWidget] Failed to convert image to data URL', error);
+      return null;
+    }
+  }
+
+  private blobToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 }
 
 interface CachedCreative {
   data: AssignData;
+  ts: number;
+}
+
+interface CachedImage {
+  data: string;
   ts: number;
 }

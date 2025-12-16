@@ -4,7 +4,7 @@ export interface WidgetConfig {
   userKey?: string;
   randomAssignment?: boolean; // true: 每次随机, false: 固定分配
   /**
-   * 缓存时长，毫秒。默认 10 分钟。设置为 0 或 disableCache=true 可关闭缓存。
+   * 缓存时长，毫秒。默认 1 小时。设置为 0 或 disableCache=true 可关闭缓存。
    */
   cacheTTL?: number;
   /**
